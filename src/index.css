@@ -1,13 +1,48 @@
-body {
-  margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.menu-container{
+     @apply absolute px-5 py-1 flex justify-between w-1/4 left-1/2 top-10 rounded-md;
+     border: 1px solid theme('colors.background1');
+     transform: translateX(-50%);
+     box-shadow: theme('colors.shadow1');
+     background-color: theme('colors.background1');
+
 }
 
-code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-    monospace;
+.icon-wrapper{
+    @apply cursor-pointer flex justify-center items-center h-10 w-10 rounded-md;
+
+    &:hover, &.active{
+        background-color: theme('colors.text2');
+    }
+}
+
+.toolbox-container{
+    @apply p-5 absolute top-1/4 left-5 w-64 rounded-md;
+    box-shadow: theme('colors.shadow1');
+    border:1px solid theme('colors.background1');
+
+    .tool-item{
+        @apply mb-5;
+
+        .tool-text{
+            font-size:11px;
+            color:theme('colors.text1');
+        }
+
+        .items-container{
+            @apply flex justify-between mt-2;
+
+            .color-box{
+                @apply h-5 w-5 mr-1 rounded-sm cursor-pointer;
+
+                &:hover, .active{
+                     border: 1.5px solid theme('colors.border2');
+                     box-shadow: theme('colors.shadow2');
+                }
+            }
+        }
+    }
 }
