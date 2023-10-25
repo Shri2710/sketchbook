@@ -1,11 +1,15 @@
-import React from 'react'
-import { COLORS } from '../constants'
+import React from 'react';
+import { COLORS, MENU_ITEMS } from '../constants';
+import {useSelector} from 'react-redux';
 const ToolBox = () => {
 
-  const updateBrushSize = ()=>{}
+  const activeMenuItem = useSelector((state)=>state.menu.activeMenuItem);  
+  const updateBrushSize = ()=>{
+
+  }
   return (
     <div className='toolbox-container'>
-        <div className='tool-item'>
+       {activeMenuItem === MENU_ITEMS.PENCIL && <div className='tool-item'>
            <h4 className='tool-text'>Stroke</h4>
            <div className='items-container'>
              <div className='color-box' style={{backgroundColor:COLORS.BLACK}} />
@@ -15,7 +19,7 @@ const ToolBox = () => {
              <div className='color-box' style={{backgroundColor:COLORS.ORANGE}} />
              <div className='color-box' style={{backgroundColor:COLORS.YELLOW}} />
            </div> 
-        </div>
+        </div>}
         <div className='tool-item'>
            <h4 className='tool-text'>Brush Size</h4>
            <div className='items-container'>

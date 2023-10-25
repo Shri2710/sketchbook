@@ -1,8 +1,19 @@
-import React from 'react'
+import React, { useEffect, useRef } from 'react'
 
 const Board = () => {
+  const canvasRef = useRef(null);
+
+  useEffect(()=>{
+    if(!canvasRef.current) return;
+
+    const canvas = canvasRef.current;
+    const context = canvas.getContext('2d');
+
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+  },[]);
   return (
-    <div>Board</div>
+    <canvas ref={canvasRef}></canvas>
   )
 }
 
