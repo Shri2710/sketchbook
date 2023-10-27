@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useLayoutEffect } from 'react'
 import { useSelector, useDispatch } from 'react-redux';
 import { MENU_ITEMS } from './../constants';
 import { menuItemClick, actionItemClick } from './../slice/menuSlice';
+import { socket } from '../socket';
 const Board = () => {
   const dispatch = useDispatch();
   const shouldDrawRef = useRef(false);
@@ -27,13 +28,13 @@ const Board = () => {
 
       dispatch(actionItemClick(null))
     } else if (actionMenuItem === MENU_ITEMS.UNDO || actionMenuItem === MENU_ITEMS.REDO) {
-      if(actionMenuItem=== MENU_ITEMS.UNDO &&  historPointer.current > 0) historPointer.current-=1;
+      if (actionMenuItem === MENU_ITEMS.UNDO && historPointer.current > 0) historPointer.current -= 1;
 
-      if(actionMenuItem=== MENU_ITEMS.REDO &&  historPointer.current < drawHistory.current.length -1) historPointer.current+=1;
+      if (actionMenuItem === MENU_ITEMS.REDO && historPointer.current < drawHistory.current.length - 1) historPointer.current += 1;
 
-       const image = drawHistory.current[historPointer.current];
-       context.putImageData(image,0,0);
-       dispatch(actionItemClick(null))
+      const image = drawHistory.current[historPointer.current];
+      context.putImageData(image, 0, 0);
+      dispatch(actionItemClick(null))
     }
   }, [actionMenuItem]);
 
@@ -43,12 +44,21 @@ const Board = () => {
     const canvas = canvasRef.current;
     const context = canvas.getContext('2d');
 
-    const changeConfig = () => {
+    const changeConfig = (color,size) => {
       context.strokeStyle = color;
       context.lineWidth = size;
     }
 
-    changeConfig();
+    const handleChangeConfig = (config)=>{
+        changeConfig(config.color,config.size);
+    }
+    changeConfig(color,size);
+
+    socket.on("changeConfig",handleChangeConfig);
+
+    return ()=>{
+      socket.off("changeConfig")
+    }
   }, [color, size]);
 
 
@@ -72,7 +82,9 @@ const Board = () => {
     const handleMouseDown = (e) => {
       shouldDrawRef.current = true;
 
-      beginPath(e.clientX, e.clientY)
+      beginPath(e.clientX, e.clientY);
+
+      socket.emit('beginPath',{x:e.clientX,y:e.clientY});
     }
 
     const handleMouseMove = (e) => {
@@ -81,24 +93,44 @@ const Board = () => {
 
       drawLine(e.clientX, e.clientY);
 
+      socket.emit('drawLine',{x:e.clientX,y:e.clientY});
+
     }
 
     const handleMouseUp = (e) => {
       shouldDrawRef.current = false;
 
-      const imageData=context.getImageData(0,0,canvas.width,canvas.height);
+      const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
 
       drawHistory.current.push(imageData);
       historPointer.current = drawHistory.current.length - 1;
+    }
+
+    const handleBeginPath = (path)=>{
+       beginPath(path.x,path.y);
+    }
+
+    const handleDrawLine = (path)=>{
+        context.lineTo(path.x, path.y);
+      context.stroke();
     }
     canvas.addEventListener('mousedown', handleMouseDown);
     canvas.addEventListener('mouseup', handleMouseUp);
     canvas.addEventListener('mousemove', handleMouseMove);
 
+    socket.on("connect", () => {
+      console.log("Client Connected");
+    });
+
+    socket.on("beginPath",handleBeginPath);
+    socket.on("drawLine",handleDrawLine);
     return () => {
       canvas.removeEventListener('mousedown', handleMouseDown);
       canvas.removeEventListener('mouseup', handleMouseUp);
       canvas.removeEventListener('mousemove', handleMouseMove);
+
+      socket.off("beginPath",handleBeginPath);
+    socket.off("drawLine",handleDrawLine);
     }
   }, []);
 
